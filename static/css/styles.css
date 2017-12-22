@@ -1,7 +1,9 @@
 .pass {
-    background: green
+    color: white;
+    background: green;
 }
 
 .fail {
-    background: red
+    color: black;
+    background: red;
 }

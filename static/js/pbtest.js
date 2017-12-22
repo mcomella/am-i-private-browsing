@@ -8,7 +8,7 @@ var _pbLocalStorage = {
     id: "localStorage",
     isSupported: !!window.localStorage,
     init: function() { window.localStorage.setItem(_TEST_KEY, _TEST_VALUE); },
-    hasOldData: function() { return window.localStorage.getItem(_TEST_KEY) !== null; },
+    isFailed: function() { return window.localStorage.getItem(_TEST_KEY) !== null; },
 };
 
 function updatePass(id) {
@@ -19,19 +19,24 @@ function updateFail(id) {
     document.getElementById(id).className = _CLASS_FAIL;
 }
 
-window.onload = function() {
-    if (_pbLocalStorage.isSupported) {
-        if (!_pbLocalStorage.hasOldData()) {
-            updatePass(_pbLocalStorage.id);
-        } else {
-            updateFail(_pbLocalStorage.id);
-        }
-
-        _pbLocalStorage.init();
+function runTest(test) {
+    if (!test.isSupported) {
+        alert(test.id + 'is not supported'); // todo
+    } else if (test.isFailed()) {
+        updateFail(test.id);
+    } else {
+        updatePass(test.id);
     }
+
+    test.init(); // for page reload.
 }
 
-// feature name, feature test
-// if test does not pass, modify feature class
-//
-// initialize new test.
+var _tests = [
+    _pbLocalStorage,
+];
+
+window.onload = function() {
+    for (var i = 0; i < _tests.length; i++) {
+        runTest(_tests[i]);
+    }
+}
