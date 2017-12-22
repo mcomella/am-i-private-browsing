@@ -14,36 +14,79 @@ function updateFail(id) {
 
 function runTest(test) {
     if (!test.isSupported) {
-        alert(test.id + 'is not supported'); // todo
-    } else if (test.isFailed()) {
-        updateFail(test.id);
-    } else {
-        updatePass(test.id);
+        alert(test.id + 'is not supported'); // todo: update not supported.
+        return new Promise(function(resolve, reject) { resolve(); });
     }
 
-    test.init(); // for page reload.
+    var isFailed;
+    return test.isFailed().then(function(isFailedInner) {
+        isFailed = isFailedInner;
+        return test.init();
+    }).then(function() {
+        // We block for init before returning results to avoid premature page reload.
+        if (isFailed) {
+            updateFail(test.id);
+        } else {
+            updatePass(test.id);
+        }
+    });
 }
 
 var _tests = [{
     id: "localStorage",
     isSupported: !!window.localStorage,
-    init: function() { window.localStorage.setItem(_TEST_KEY, _TEST_VALUE); },
-    isFailed: function() { return window.localStorage.getItem(_TEST_KEY) !== null; },
-}, {
+    init: function() {
+        return new Promise(function(resolve, reject) {
+            window.localStorage.setItem(_TEST_KEY, _TEST_VALUE);
+            resolve();
+        });
+    },
+    isFailed: function() {
+        return new Promise(function(resolve, reject) {
+            resolve(window.localStorage.getItem(_TEST_KEY) !== null);
+        });
+    },
 
+}, {
     id: "sessionStorage",
     isSupported: !!window.sessionStorage,
-    init: function() { window.sessionStorage.setItem(_TEST_KEY, _TEST_VALUE); },
-    isFailed: function() { return window.sessionStorage.getItem(_TEST_KEY) !== null; },
-}, {
+    init: function() {
+        return new Promise(function(resolve, reject) {
+            window.sessionStorage.setItem(_TEST_KEY, _TEST_VALUE);
+            resolve();
+        });
+    },
+    isFailed: function() {
+        return new Promise(function(resolve, reject) {
+            resolve(window.sessionStorage.getItem(_TEST_KEY) !== null);
+        });
+    },
 
+/*}, {
     id: 'indexedDB',
     isSupported: !!window.indexedDB,
 
-    _open: function() { return window.indexedDB.open('PB', 1); },
     //.onsuccess .onerror .onupgradeneeded
-    init: function() { },
-    isFailed: function() { return true; },
+    init: function() {
+        return new Promise(function(resolve, reject) {
+            var req = window.indexedDB.open('TestDB', 1);
+            req.onerror = function(event) { reject("error: + " event.target.errorCode); };
+            req.onsuccess = function(event) { reject("upgrade expected"); };
+            req.onupgradeneeded = function(event) {
+                var db = event.target.result;
+                db.createObjectStore("pbTest", { keyPath: "id" });
+                db.transaction.oncomplete = function(event) {
+                    var pbTestObjStore = db.transaction("pbTest", "readwrite").objectStore("pbTest");
+                    pbTestObjStore.add({id: 100});
+                    resolve();
+                };
+            };
+        });
+    },
+    isFailed: function() {
+        var req = window.
+    },
+    */
 }];
 
 window.onload = function() {
