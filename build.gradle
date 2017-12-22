@@ -4,17 +4,26 @@ apply plugin: 'application'
 
 repositories {
     jcenter()
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
+    maven { url "https://dl.bintray.com/kotlin/ktor" }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
+    // We choose ktor because it's kotlin-based and recommended by JetBrains,
+    // but there are many other good Java choices.
+    compile "io.ktor:ktor-server-netty:$ktor_version"
+    compile "ch.qos.logback:logback-classic:1.2.1" // ktor logger.
+    testCompile "io.ktor:ktor-server-test-host:$ktor_version"
+
     testCompile 'junit:junit:4.12'
 }
 
-mainClassName = "org.mozilla.pbtest.AppKt"
+mainClassName = 'io.ktor.server.netty.DevelopmentEngine'
 buildscript {
     ext.kotlin_version = '1.2.10'
+    ext.ktor_version = '0.9.1-alpha-8' // alpha needed for kotlin 1.2 support.
     repositories {
         mavenCentral()
     }
@@ -30,6 +39,12 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
     }
 }
 
