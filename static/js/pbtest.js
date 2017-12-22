@@ -4,11 +4,28 @@ var _TEST_VALUE = 'apparently not';
 var _CLASS_PASS = "pass";
 var _CLASS_FAIL = "fail";
 
-var _pbLocalStorage = {
+var _localStorage = {
     id: "localStorage",
     isSupported: !!window.localStorage,
     init: function() { window.localStorage.setItem(_TEST_KEY, _TEST_VALUE); },
     isFailed: function() { return window.localStorage.getItem(_TEST_KEY) !== null; },
+};
+
+var _sessionStorage = {
+    id: "sessionStorage",
+    isSupported: !!window.sessionStorage,
+    init: function() { window.sessionStorage.setItem(_TEST_KEY, _TEST_VALUE); },
+    isFailed: function() { return window.sessionStorage.getItem(_TEST_KEY) !== null; },
+};
+
+var _indexedDB = {
+    id: 'indexedDB',
+    isSupported: !!window.indexedDB,
+
+    _open: function() { return window.indexedDB.open('PB', 1); },
+    //.onsuccess .onerror .onupgradeneeded
+    init: function() { },
+    isFailed: function() { },
 };
 
 function updatePass(id) {
@@ -32,7 +49,9 @@ function runTest(test) {
 }
 
 var _tests = [
-    _pbLocalStorage,
+    _localStorage,
+    _sessionStorage,
+    //_indexedDB,
 ];
 
 window.onload = function() {
